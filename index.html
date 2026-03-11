@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LUMINAL — 2126</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #040812;
+    --surface: #080f20;
+    --panel: #0b1629;
+    --border: #1a2d50;
+    --glow: #00e5ff;
+    --glow2: #7b61ff;
+    --accent: #ff6b35;
+    --text: #d4e8ff;
+    --muted: #4a6fa5;
+    --chalk: #e8f4f8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* Starfield bg */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 25%, rgba(0,229,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 75% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 45%, rgba(123,97,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 20% 88%, rgba(255,255,255,0.25) 0%, transparent 100%),
+      radial-gradient(1px 1px at 65% 5%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 92% 70%, rgba(0,229,255,0.3) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Grid overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    padding: 48px 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    animation: fadeDown 0.8s ease both;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    letter-spacing: 0.15em;
+    background: linear-gradient(90deg, var(--glow), var(--glow2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .badge {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--glow);
+    border: 1px solid var(--glow);
+    padding: 4px 10px;
+    border-radius: 2px;
+    opacity: 0.8;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    padding: 72px 0 48px;
+    animation: fadeUp 1s ease 0.2s both;
+  }
+
+  .year-tag {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--chalk);
+    margin-bottom: 20px;
+  }
+
+  h1 span {
+    background: linear-gradient(90deg, var(--glow), var(--glow2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.8;
+    max-width: 560px;
+    border-left: 2px solid var(--glow2);
+    padding-left: 16px;
+  }
+
+  /* ─── EVOLUTION TIMELINE ─── */
+  .section-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--glow);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-bottom: 64px;
+    animation: fadeUp 1s ease 0.4s both;
+  }
+
+  .tl-item {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 24px 20px;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+  .tl-item:hover { border-color: var(--glow); }
+  .tl-item.active {
+    border-color: var(--glow);
+    background: linear-gradient(135deg, #0b1a35, #091228);
+  }
+  .tl-item.active::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--glow), var(--glow2));
+  }
+
+  .tl-year {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .tl-item.active .tl-year { color: var(--glow); }
+
+  .tl-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--chalk);
+    margin-bottom: 10px;
+  }
+
+  .tl-desc {
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ─── BOARD VISUALIZATION ─── */
+  .board-section {
+    margin-bottom: 64px;
+    animation: fadeUp 1s ease 0.5s both;
+  }
+
+  .board-wrap {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .board-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.04), transparent 60%);
+    pointer-events: none;
+  }
+
+  /* The "board" itself */
+  .holographic-board {
+    background: linear-gradient(160deg, #010d1a 0%, #020e1c 100%);
+    border: 1px solid rgba(0,229,255,0.15);
+    border-radius: 3px;
+    padding: 28px;
+    position: relative;
+    min-height: 220px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .holographic-board::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+  }
+
+  /* Animated "chalk" writing lines */
+  .chalk-line {
+    height: 2px;
+    background: rgba(232,244,248,0.7);
+    border-radius: 2px;
+    margin-bottom: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .chalk-line::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 30%;
+    background: linear-gradient(90deg, transparent, rgba(0,229,255,0.6), transparent);
+    animation: scanline 3s ease-in-out infinite;
+  }
+  @keyframes scanline {
+    0% { left: -30%; opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { left: 100%; opacity: 0; }
+  }
+
+  .chalk-line:nth-child(1) { width: 80%; animation-delay: 0s; }
+  .chalk-line:nth-child(2) { width: 65%; }
+  .chalk-line:nth-child(3) { width: 72%; }
+  .chalk-line:nth-child(4) { width: 45%; }
+  .chalk-line:nth-child(5) { width: 58%; }
+
+  .chalk-line:nth-child(2)::after { animation-delay: 0.6s; }
+  .chalk-line:nth-child(3)::after { animation-delay: 1.2s; }
+  .chalk-line:nth-child(4)::after { animation-delay: 1.8s; }
+  .chalk-line:nth-child(5)::after { animation-delay: 2.4s; }
+
+  /* Corner indicators */
+  .board-corner {
+    position: absolute;
+    width: 14px; height: 14px;
+    border-color: var(--glow);
+    border-style: solid;
+    opacity: 0.6;
+  }
+  .board-corner.tl { top: 8px; left: 8px; border-width: 1px 0 0 1px; }
+  .board-corner.tr { top: 8px; right: 8px; border-width: 1px 1px 0 0; }
+  .board-corner.bl { bottom: 8px; left: 8px; border-width: 0 0 1px 1px; }
+  .board-corner.br { bottom: 8px; right: 8px; border-width: 0 1px 1px 0; }
+
+  /* Live status */
+  .live-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--glow);
+    position: absolute;
+    top: 16px; right: 16px;
+    z-index: 2;
+  }
+  .live-dot::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--glow);
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+    box-shadow: 0 0 6px var(--glow);
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  /* Board toolbar */
+  .board-toolbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .tool-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 2px;
+  }
+  .tool-btn:hover, .tool-btn.active {
+    color: var(--glow);
+    border-color: var(--glow);
+    background: rgba(0,229,255,0.05);
+  }
+  .tool-btn.accent {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(255,107,53,0.06);
+  }
+
+  /* ─── FEATURE GRID ─── */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    margin-bottom: 64px;
+    animation: fadeUp 1s ease 0.6s both;
+  }
+
+  .feat {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 28px 24px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .feat:hover {
+    border-color: var(--glow2);
+    transform: translateY(-2px);
+  }
+  .feat:hover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 0% 0%, rgba(123,97,255,0.06), transparent 60%);
+    pointer-events: none;
+  }
+
+  .feat-icon {
+    font-size: 1.4rem;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .feat-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--chalk);
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .feat-desc {
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  .feat-tag {
+    display: inline-block;
+    margin-top: 12px;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--glow2);
+    border: 1px solid rgba(123,97,255,0.3);
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+
+  /* ─── FLOW DIAGRAM ─── */
+  .flow {
+    margin-bottom: 64px;
+    animation: fadeUp 1s ease 0.7s both;
+  }
+
+  .flow-steps {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .flow-step {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 20px 16px;
+    flex: 1;
+    min-width: 130px;
+    position: relative;
+    text-align: center;
+    transition: border-color 0.3s;
+  }
+  .flow-step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--glow);
+    font-size: 0.9rem;
+    z-index: 2;
+    background: var(--bg);
+    padding: 2px 4px;
+  }
+  .flow-step:hover { border-color: var(--glow); }
+
+  .step-num {
+    font-size: 0.6rem;
+    color: var(--glow);
+    letter-spacing: 0.2em;
+    margin-bottom: 8px;
+  }
+  .step-label {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    color: var(--chalk);
+    margin-bottom: 6px;
+  }
+  .step-sub {
+    font-size: 0.65rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ─── STAT BAR ─── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-bottom: 64px;
+    animation: fadeUp 1s ease 0.8s both;
+  }
+
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 24px 16px;
+    text-align: center;
+  }
+
+  .stat-val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.8rem;
+    background: linear-gradient(90deg, var(--glow), var(--glow2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* ─── MANIFESTO ─── */
+  .manifesto {
+    background: linear-gradient(135deg, #0a0f22, #060c1a);
+    border: 1px solid var(--border);
+    padding: 48px 40px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 1s ease 0.9s both;
+  }
+  .manifesto::before {
+    content: '"';
+    position: absolute;
+    top: -20px; left: 24px;
+    font-family: 'Syne', sans-serif;
+    font-size: 12rem;
+    color: rgba(0,229,255,0.04);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .manifesto-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 400;
+    font-size: 1.25rem;
+    line-height: 1.7;
+    color: var(--chalk);
+    position: relative;
+    z-index: 1;
+    margin-bottom: 20px;
+  }
+
+  .manifesto-text strong {
+    background: linear-gradient(90deg, var(--glow), var(--glow2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .manifesto-sig {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    animation: fadeUp 1s ease 1s both;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 640px) {
+    .timeline, .features { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .flow-steps { flex-direction: column; }
+    .flow-step:not(:last-child)::after { content: '↓'; right: auto; left: 50%; top: auto; bottom: -14px; transform: translateX(-50%); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">LUMINAL</div>
+    <div class="badge">EST. 2126 · NEURAL SURFACE SYSTEMS</div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <span class="year-tag">// FOUNDED 2126 · REIMAGINED FROM 2026</span>
+    <h1>The Board<br/>that <span>Thinks</span><br/>With You.</h1>
+    <p class="hero-sub">
+      Born from the tradition of analog teaching surfaces, LUMINAL evolved the chalkboard into a
+      quantum-surface writing system — still physical, still tactile, but now fully neural-synced,
+      session-aware, and post-class ready. Every stroke captured. Every insight verified. Nothing lost.
+    </p>
+  </section>
+
+  <!-- TIMELINE -->
+  <div class="section-label">Origin Timeline</div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-year">// 2026</div>
+      <div class="tl-name">The Chalk Board+</div>
+      <div class="tl-desc">Physical board with optical capture. Notes photographed post-session, professor reviews before digital release.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-year">// 2065</div>
+      <div class="tl-name">SurfaceSync Era</div>
+      <div class="tl-desc">Pressure-sensitive nano-coating reads ink in real time. Auto-transcription with 98.2% accuracy. Multi-room broadcast.</div>
+    </div>
+    <div class="tl-item active">
+      <div class="tl-year">// 2126 · NOW</div>
+      <div class="tl-name">LUMINAL v9</div>
+      <div class="tl-desc">Quantum-surface board. Neural handwriting fidelity. Holographic export. Professor-gated release with AI integrity checks.</div>
+    </div>
+  </div>
+
+  <!-- HOLOGRAPHIC BOARD VIZ -->
+  <div class="board-section">
+    <div class="section-label">Live Session Interface</div>
+    <div class="board-wrap">
+      <div class="holographic-board">
+        <div class="board-corner tl"></div>
+        <div class="board-corner tr"></div>
+        <div class="board-corner bl"></div>
+        <div class="board-corner br"></div>
+        <div class="live-dot">LIVE CAPTURE</div>
+        <div class="chalk-line"></div>
+        <div class="chalk-line"></div>
+        <div class="chalk-line"></div>
+        <div class="chalk-line"></div>
+        <div class="chalk-line"></div>
+      </div>
+      <div class="board-toolbar">
+        <button class="tool-btn active">⬛ CAPTURE ON</button>
+        <button class="tool-btn">⟳ REPLAY SESSION</button>
+        <button class="tool-btn">⬇ EXPORT PACKET</button>
+        <button class="tool-btn">👁 PROFESSOR REVIEW</button>
+        <button class="tool-btn accent">✓ RELEASE TO CLASS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="section-label">Core Systems</div>
+  <div class="features">
+    <div class="feat">
+      <span class="feat-icon">✍️</span>
+      <div class="feat-title">Quantum Surface Writing</div>
+      <div class="feat-desc">The board surface remains fully analog — chalk, markers, bare hands. Beneath it, a quantum-lattice layer captures every stroke at 0.01mm resolution, preserving natural writing feel while logging perfect digital twins.</div>
+      <span class="feat-tag">ANALOG CORE</span>
+    </div>
+    <div class="feat">
+      <span class="feat-icon">🔁</span>
+      <div class="feat-title">Neural Sync & Meeting Bridge</div>
+      <div class="feat-desc">Sessions broadcast live to any remote participant — holographic or flat. The board detects context shifts (new topic, erasure, revision) and timestamps them automatically for timestamped review.</div>
+      <span class="feat-tag">LIVE STREAM</span>
+    </div>
+    <div class="feat">
+      <span class="feat-icon">🧠</span>
+      <div class="feat-title">Fidelity Intelligence Layer</div>
+      <div class="feat-desc">AI audits every captured note for accuracy against the professor's spoken words. Corrections are flagged — not auto-applied. The professor remains in full control of what students receive.</div>
+      <span class="feat-tag">INTEGRITY ENGINE</span>
+    </div>
+    <div class="feat">
+      <span class="feat-icon">🔐</span>
+      <div class="feat-title">Gated Release Protocol</div>
+      <div class="feat-desc">No note packet is distributed without professor sign-off. Review happens in a clean proof interface. Edits, redactions, and annotations can be added before the session export is unlocked for download.</div>
+      <span class="feat-tag">PROF-GATED</span>
+    </div>
+  </div>
+
+  <!-- FLOW -->
+  <div class="flow">
+    <div class="section-label">Session Lifecycle</div>
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="step-num">01</div>
+        <div class="step-label">Write Naturally</div>
+        <div class="step-sub">Chalk on surface. No change to teaching style.</div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">02</div>
+        <div class="step-label">Auto-Capture</div>
+        <div class="step-sub">Quantum lattice logs every stroke in real time.</div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">03</div>
+        <div class="step-label">AI Audit</div>
+        <div class="step-sub">Fidelity check cross-references audio + visual.</div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">04</div>
+        <div class="step-label">Prof Review</div>
+        <div class="step-sub">One-tap approve, edit, or redact before release.</div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">05</div>
+        <div class="step-label">Student Export</div>
+        <div class="step-sub">Perfect note packet: holographic, PDF, or neural-upload.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-val">99.97%</div>
+      <div class="stat-label">Stroke Fidelity</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">0.3s</div>
+      <div class="stat-label">Capture Latency</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">14B+</div>
+      <div class="stat-label">Sessions Logged</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">180+</div>
+      <div class="stat-label">Planetary Campuses</div>
+    </div>
+  </div>
+
+  <!-- MANIFESTO -->
+  <div class="manifesto">
+    <p class="manifesto-text">
+      "We never abandoned the board. We just gave it <strong>a memory</strong>.
+      The act of writing — the struggle of thinking through a marker —
+      is still the most <strong>human thing in any classroom</strong>.
+      LUMINAL protects that ritual, while making sure no insight
+      ever slips off the edge of an eraser again."
+    </p>
+    <div class="manifesto-sig">— LUMINAL FOUNDING CHARTER, 2126</div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div>LUMINAL SYSTEMS · NEURAL SURFACE DIVISION</div>
+    <div>FOUNDED 2126 · BUILT ON A 2026 CHALKBOARD</div>
+  </footer>
+
+</div>
+</body>
+</html>
